@@ -45,20 +45,16 @@
         .page-desc { color: #777; margin-bottom: 30px; font-size: 15px; line-height: 1.6; }
 
         /* كروت المنتجات */
-        .products-grid { display: flex; flex-wrap: wrap; gap: 20px; }
-        .product-card { background: #050505; border-radius: 12px; width: 290px; border: 1px solid #111; overflow: hidden; transition: 0.3s; display: flex; flex-direction: column; }
-        .product-card:hover { border-color: #e94560; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(233, 69, 96, 0.1); }
-        
-        .product-img-container { width: 100%; height: 180px; background-color: #020202; position: relative; border-bottom: 1px solid #111; }
-        .product-img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
-        .product-badge { position: absolute; top: 12px; right: 12px; background: #e94560; color: #fff; font-size: 10px; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-
-        .product-details { padding: 20px; flex: 1; display: flex; flex-direction: column; text-align: center; }
-        .product-title { font-size: 19px; color: #fff; font-weight: bold; margin-bottom: 10px; }
-        .product-desc-text { color: #666; font-size: 13px; margin-bottom: 15px; line-height: 1.4; }
-        .product-price { background: #000; padding: 12px; border-radius: 8px; color: #e94560; font-weight: bold; font-size: 14px; border: 1px solid #111; margin-top: auto; margin-bottom: 15px; }
-        .order-btn { width: 100%; background: #e94560; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .order-btn:hover { background: #ff526f; }
+        // استبدل مصفوفة products في كودك بهذا الجزء:
+storeData.products = [
+    { cat: "أسلحة 8 نجوم", name: "شوزن الخراب بسحاب", desc: "أقوى سلاح في المتجر", img: "رابط_صورة_الشوزن", price: "30 مليون" },
+    { cat: "أسلحة 7 نجوم", name: "بندقية الغريم الهجومية", desc: "دقة عالية في الإصابة", img: "رابط_صورة_البندقية", price: "10 مليون" },
+    { cat: "أسلحة 8 نجوم", name: "رشاش أبو شعر الخفيف", desc: "سريع وخفيف الوزن", img: "رابط_صورة_الرشاش", price: "65 مليون" },
+    { cat: "أسلحة 6 نجوم", name: "مسدس رشاش", desc: "مثالي للمواجهات القريبة", img: "رابط_صورة_المسدس", price: "30-80 مليون" },
+    { cat: "أسلحة 5 نجوم", name: "سبيس ذهبي وبنفسجي", desc: "شكل فخم ومميز", img: "رابط_صورة_السبيس", price: "10 مليون" },
+    { cat: "أسلحة 7 نجوم", name: "مسدس مدفعي", desc: "قوة تدميرية هائلة", img: "رابط_صورة_المدفعي", price: "تفاوض في التكت" },
+    { cat: "أسلحة محذوفة", name: "رشاش النذير", desc: "سلاح المداهمات", img: "رابط_صورة_النذير", price: "تفاوض في التكت " }
+];
 
         /* لوحة التحكم */
         .admin-box { background: #050505; border: 1px solid #111; border-radius: 12px; padding: 25px; margin-bottom: 30px; }
