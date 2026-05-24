@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مخزن أسلحة ريسبكت تاون</title>
+    <style>
+        /* ثيم أسود ملكي كامل خفيف وسريع جداً */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #000000; color: #e0e0e0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* القائمة الجانبية قابلة للتمرير */
+        .sidebar { width: 290px; background-color: #050505; border-left: 1px solid #151515; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px 20px; background-color: #000000; text-align: center; border-bottom: 1px solid #151515; flex-shrink: 0; }
+        .sidebar-header h3 { color: #fff; font-size: 17px; font-weight: bold; }
+        .sidebar-header span { color: #e94560; }
+        
+        .sidebar-menu { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #151515 #050505; }
+        
+        /* العناوين الفرعية لتنظيم الأقسام */
+        .menu-section-title { padding: 15px 20px 5px 20px; font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+
+        /* أزرار القائمة */
+        .menu-btn { width: 100%; background: none; border: none; color: #a0a0a0; padding: 13px 20px; text-align: right; font-size: 14px; font-weight: bold; cursor: pointer; border-bottom: 1px solid #0a0a0a; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; }
+        .menu-btn:hover { background-color: #0a0a0a; color: #fff; }
+        .menu-btn.active { background-color: #0f0f0f; color: #e94560; border-right: 4px solid #e94560; }
+        .menu-btn span.badge { background: #e94560; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; }
+
+        /* شريط الحساب */
+        .sidebar-user { padding: 20px 15px; background: #000000; border-top: 1px solid #151515; text-align: center; flex-shrink: 0; }
+        .user-tag { color: #e0e0e0; font-weight: bold; font-size: 14px; margin-bottom: 10px; display: block; }
+        .auth-action-btn { width: 100%; padding: 10px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .login-style { background: #e94560; color: #fff; }
+        .logout-style { background: #151515; color: #ff4d4d; border: 1px solid #222; }
+
+        /* منطقة المحتوى */
+        .main-content { flex: 1; padding: 35px; overflow-y: auto; background-color: #000000; }
+        
+        /* نظام الصفحات */
+        .page { display: none; }
+        .page.active-page { display: block; }
+
+        .page-title { font-size: 26px; color: #fff; margin-bottom: 8px; font-weight: bold; }
+        .page-desc { color: #666; margin-bottom: 30px; font-size: 14.5px; }
+
+        /* كروت المنتجات */
+        .products-grid { display: flex; flex-wrap: wrap; gap: 25px; }
+        .weapon-card { background: #050505; border-radius: 6px; padding: 22px; width: 300px; border: 1px solid #151515; }
+        .weapon-card:hover { border-color: #e94560; }
+        .weapon-rarity { height: 4px; border-radius: 2px; margin-bottom: 15px; }
+        .weapon-title { font-size: 19px; color: #fff; font-weight: bold; margin-bottom: 8px; }
+        .weapon-desc { font-size: 13.5px; color: #888; line-height: 1.5; margin-bottom: 18px; min-height: 40px; }
+        .weapon-price { background: #000000; padding: 10px; border-radius: 4px; color: #e94560; text-align: center; font-weight: bold; font-size: 13.5px; margin-bottom: 15px; border: 1px solid #111; }
+        .order-btn { width: 100%; background: #e94560; color: #fff; border: none; padding: 11px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .order-btn:hover { background: #ff526f; }
+
+        /* النافذة المنبثقة */
+        .auth-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: #050505; padding: 30px; border-radius: 8px; text-align: center; border: 1px solid #222; width: 90%; max-width: 400px; }
+        .modal-tabs { display: flex; justify-content: center; gap: 10px; margin: 15px 0; }
+        .tab-btn { background: #000000; color: #666; border: 1px solid #151515; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: #e94560; color: #fff; border-color: #e94560; }
+        .modal-content input { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #151515; background: #000000; color: #fff; text-align: center; font-size: 15px; }
+        .modal-content .submit-btn { background-color: #e94560; color: white; border: none; padding: 12px; border-radius: 4px; font-size: 15px; cursor: pointer; width: 100%; font-weight: bold; }
+
+        /* لوحة التحكم */
+        .admin-stats { display: flex; gap: 20px; margin-bottom: 25px; }
+        .stat-box { background: #050505; padding: 20px; border-radius: 6px; flex: 1; text-align: center; border: 1px solid #151515; }
+        .stat-box h4 { color: #555; font-size: 13px; }
+        .stat-box p { color: #fff; font-size: 26px; font-weight: bold; margin-top: 5px; }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #050505; border-radius: 6px; overflow: hidden; text-align: right; border: 1px solid #151515; }
+        .admin-table th, .admin-table td { padding: 14px 15px; border-bottom: 1px solid #111; font-size: 14px; }
+        .admin-table th { background-color: #0a0a0a; color: #fff; }
+        .action-btn-del { background: #cf3a52; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+        .action-btn-done { background: #219653; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+        
+        .alert-link { color: #e94560; text-decoration: none; font-weight: bold; border-bottom: 1px dashed #e94560; }
+        .alert-link:hover { color: #ff526f; border-bottom-style: solid; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>متجر <span>ريسبكت تاون</span></h3>
+        </div>
+        
+        <div class="sidebar-menu">
+            <button class="menu-btn active" onclick="switchPage('welcome', this)">👋 أهلاً بك في المتجر</button>
+            
+            <div class="menu-section-title">⚔️ أقسام الأسلحة</div>
+            <button class="menu-btn" onclick="switchPage('star-8', this)">⚡ أسلحة 8 نجوم</button>
+            <button class="menu-btn" onclick="switchPage('star-7', this)">🔥 أسلحة 7 نجوم</button>
+            <button class="menu-btn" onclick="switchPage('star-6', this)">🔮 أسلحة 6 نجوم</button>
+            <button class="menu-btn" onclick="switchPage('star-5', this)">🔫 أسلحة 5 نجوم</button>
+            <button class="menu-btn" onclick="switchPage('deleted-weapons', this)">⚠️ أسلحة محذوفة <span class="badge">نادر</span></button>
+            <button class="menu-btn" onclick="switchPage('vip-weapons', this)">👑 قسم عملاء VIP</button>
+            
+            <button id="adminSidebarBtn" class="menu-btn" onclick="switchPage('admin', this)" style="border-top: 1px solid #151515; color: #e94560; display: none;">🛠️ لوحة الإدارة والطلبات</button>
+        </div>
+
+        <div class="sidebar-user">
+            <span class="user-tag" id="sidebarUserTag">👤 زائر غير مسجل</span>
+            <div id="authBtnArea">
+                <button class="auth-action-btn login-style" onclick="openAuthModal('login')">تسجيل دخول</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <div id="page-welcome" class="page active-page">
+            <h1 class="page-title">مخزن أسلحة ريسبكت تاون</h1>
+            <p class="page-desc">تصفح الأسلحة المتكاملة من القائمة الجانبية واطلب الآن بكل سهولة وسرعة.</p>
+            
+            <div style="background: #050505; padding: 25px; border-radius: 6px; border-right: 4px solid #e94560; border-top: 1px solid #151515; border-bottom: 1px solid #151515;">
+                <h3 style="color: #fff; font-size: 16px; margin-bottom: 15px;">📜 الشروط والأحكام والتعليمات الهامة:</h3>
+                <p style="line-height: 1.8; color: #ccc; font-size: 14.5px;">
+                    السلام عليكم ورحمة الله يا أخوان، ضروري أن تسجيل الحساب يكون بـ <b>يوزر الديسكورد حقك</b> وتكون داخل السيرفر المعتمد عبر الرابط التالي: 
+                    <a href="https://discord.gg/WrnNdnvsfW" target="_blank" class="alert-link">رابط سيرفر الديسكورد</a>.
+                    <br><br>
+                    <span style="color: #ff4d4d; font-weight: bold;">⚠️ تنبيه هام جداً:</span> إذا أنت طلبت والطلب ما تم فاعرف وتأكد إنك سويت شيء غلط في الخطوات السابقة (مثل كتابة يوزر غير صحيح أو عدم التواجد في السيرفر).
+                </p>
+            </div>
+        </div>
+
+        <div id="page-star-8" class="page">
+            <h1 class="page-title">⚡ أسلحة 8 نجوم</h1>
+            <p class="page-desc">أقوى وأندر الأسلحة المدمرة بالمخزن.</p>
+            <div class="products-grid">
+                <div class="weapon-card">
+                    <div class="weapon-rarity" style="background: #e94560;"></div>
+                    <div class="weapon-title">سلاح خارق ليفل 8</div>
+                    <p class="weapon-desc">ثبات كامل، دمج أقصى، وجاهز للتسليم الفوري.</p>
+                    <div class="weapon-price">السعر: تواصل عبر الديسكورد للمقايضة</div>
+                    <button class="order-btn" onclick="sendOrder('سلاح 8 نجوم ليفل 8', 'حسب المقايضة')">🛒 طلب السلاح</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-star-7" class="page">
+            <h1 class="page-title">🔥 أسلحة 7 نجوم</h1>
+            <p class="page-desc">تشكيلة أسلحة فتاكة وممتازة جداً.</p>
+            <div class="products-grid">
+                <div class="weapon-card">
+                    <div class="weapon-rarity" style="background: #e94560;"></div>
+                    <div class="weapon-title">سلاح خارق ليفل 7</div>
+                    <p class="weapon-desc">ثبات كامل، دمج أقصى، وجاهز للتسليم الفوري.</p>
+                    <div class="weapon-price">السعر: تواصل عبر الديسكورد للمقايضة</div>
+                    <button class="order-btn" onclick="sendOrder('سلاح 7 نجوم ليفل 7', 'حسب المقايضة')">🛒 طلب السلاح</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-star-6" class="page">
+            <h1 class="page-title">🔮 أسلحة 6 نجوم</h1>
+            <p class="page-desc">أسلحة متوازنة وقوية للمواجهات.</p>
+            <div class="products-grid">
+                <div class="weapon-card">
+                    <div class="weapon-rarity" style="background: #e94560;"></div>
+                    <div class="weapon-title">سلاح خارق ليفل 6</div>
+                    <p class="weapon-desc">ثبات كامل، دمج أقصى، وجاهز للتسليم الفوري.</p>
+                    <div class="weapon-price">السعر: تواصل عبر الديسكورد للمقايضة</div>
+                    <button class="order-btn" onclick="sendOrder('سلاح 6 نجوم ليفل 6', 'حسب المقايضة')">🛒 طلب السلاح</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-star-5" class="page">
+            <h1 class="page-title">🔫 أسلحة 5 نجوم</h1>
+            <p class="page-desc">خيارات ممتازة واقتصادية للاعبين.</p>
+            <div class="products-grid">
+                <div class="weapon-card">
+                    <div class="weapon-rarity" style="background: #e94560;"></div>
+                    <div class="weapon-title">سلاح خارق ليفل 5</div>
+                    <p class="weapon-desc">ثبات كامل، دمج أقصى، وجاهز للتسليم الفوري.</p>
+                    <div class="weapon-price">السعر: تواصل عبر الديسكورد للمقايضة</div>
+                    <button class="order-btn" onclick="sendOrder('سلاح 5 نجوم ليفل 5', 'حسب المقايضة')">🛒 طلب السلاح</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-deleted-weapons" class="page">
+            <h1 class="page-title">⚠️ أسلحة محذوفة</h1>
+            <p class="page-desc">أسلحة نادرة تم حذفها ومتوفرة حصرياً هنا.</p>
+            <div class="products-grid">
+                <div class="weapon-card">
+                    <div class="weapon-rarity" style="background: #e94560;"></div>
+                    <div class="weapon-title">سلاح خارق محذوف</div>
+                    <p class="weapon-desc">ثبات كامل، دمج أقصى، وجاهز للتسليم الفوري.</p>
+                    <div class="weapon-price">السعر: تواصل عبر الديسكورد للمقايضة</div>
+                    <button class="order-btn" onclick="sendOrder('سلاح محذوف نادرو', 'حسب المقايضة')">🛒 طلب السلاح</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-vip-weapons" class="page">
+            <h1 class="page-title">👑 قسم عملاء VIP</h1>
+            <p class="page-desc">عروض خاصة وحصرية لداعمي السيرفر النخبة.</p>
+            <div class="products-grid">
+                <div class="weapon-card">
+                    <div class="weapon-rarity" style="background: #e94560;"></div>
+                    <div class="weapon-title">سلاح خارق VIP</div>
+                    <p class="weapon-desc">ثبات كامل، دمج أقصى، وجاهز للتسليم الفوري.</p>
+                    <div class="weapon-price">السعر: تواصل عبر الديسكورد للمقايضة</div>
+                    <button class="order-btn" onclick="sendOrder('سلاح VIP خاص', 'حسب المقايضة')">🛒 طلب السلاح</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-admin" class="page">
+            <h1 class="page-title" style="color: #e94560;">🛠️ لوحة تحكم الإدارة (سعد)</h1>
+            <p class="page-desc">إدارة شؤون المتجر والطلبات المحفوظة بالموقع.</p>
+            
+            <div class="admin-stats">
+                <div class="stat-box"><h4>إجمالي المسجلين</h4><p id="totalUsersStat">0</p></div>
+                <div class="stat-box"><h4>الطلبات الحالية</h4><p id="totalOrdersStat" style="color:#e94560;">0</p></div>
+            </div>
+
+            <h3 style="margin: 20px 0 10px 0; color:#fff; font-size:16px;">📦 طلبات العملاء المعلقة:</h3>
+            <table class="admin-table">
+                <thead>
+                    <tr><th>العميل بالديسكورد</th><th>الخدمة المطلوبة</th><th>المقابل / السعر</th><th>التاريخ</th><th>التحكم</th></tr>
+                </thead>
+                <tbody id="adminOrdersTableBody"></tbody>
+            </table>
+
+            <h3 style="margin: 30px 0 10px 0; color:#fff; font-size:16px;">👤 يوزرات اللاعبين:</h3>
+            <table class="admin-table">
+                <thead>
+                    <tr><th>اللاعب بالديسكورد</th><th>كلمة المرور</th><th>التحكم</th></tr>
+                </thead>
+                <tbody id="adminUsersTableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div class="auth-modal" id="authModal">
+        <div class="modal-content">
+            <h2 id="modalTitle" style="color:#fff;">تسجيل الدخول</h2>
+            <div class="modal-tabs">
+                <button id="tabLogin" class="tab-btn active" onclick="switchTab('login')">تسجيل دخول</button>
+                <button id="tabRegister" class="tab-btn" onclick="switchTab('register')">إنشاء حساب</button>
+            </div>
+            <input type="text" id="authUsername" placeholder="اسم حسابك بالديسكورد بدقة">
+            <input type="password" id="authPassword" placeholder="كلمة المرور">
+            <button class="submit-btn" onclick="handleAuthSubmit()">تأكيد 🔓</button>
+        </div>
+    </div>
+
+    <script>
+        const webhookURL = "https://discord.com/api/webhooks/1507845720328114197/MSZhgbIaLPzPsTkpS-u9FN3Yf5QlXPnpaL_9hK5AcP1zurdWxzX-eq_GtzLsimIOyef0";
+        const discordInvite = "https://discord.gg/UJpNfYGBzr";
+        
+        const ADMIN_USER = "admin";
+        const ADMIN_PASS = "saad123";
+
+        let currentMode = 'login';
+
+        window.onload = function() {
+            if (!localStorage.getItem("registeredUsers")) {
+                localStorage.setItem("registeredUsers", JSON.stringify({}));
+            }
+            if (!localStorage.getItem("shopOrdersList")) {
+                localStorage.setItem("shopOrdersList", JSON.stringify([]));
+            }
+            checkUserLogin();
+        };
+
+        function switchPage(pageId, buttonElement) {
+            const loggedInUser = localStorage.getItem("currentLoggedInUser");
+            
+            if (pageId === 'admin' && loggedInUser !== ADMIN_USER) {
+                alert("🔒 هذه الصفحة خاصة بالأدمن (سعد) فقط!");
+                openAuthModal('login');
+                return;
+            }
+            
+            const buttons = document.querySelectorAll('.menu-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if(buttonElement) buttonElement.classList.add('active');
+
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active-page'));
+            
+            const targetPage = document.getElementById('page-' + pageId);
+            if(targetPage) {
+                targetPage.classList.add('active-page');
+            }
+        }
+
+        function checkUserLogin() {
+            const loggedInUser = localStorage.getItem("currentLoggedInUser");
+            const userTag = document.getElementById("sidebarUserTag");
+            const btnArea = document.getElementById("authBtnArea");
+            const adminBtn = document.getElementById("adminSidebarBtn");
+            
+            if (adminBtn) adminBtn.style.display = "none";
+
+            if (loggedInUser && loggedInUser.trim() !== "") {
+                if(userTag) userTag.innerText = `👤 ${loggedInUser}`;
+                if(btnArea) btnArea.innerHTML = `<button class="auth-action-btn logout-style" onclick="logout()">تسجيل خروج</button>`;
+                
+                if (loggedInUser === ADMIN_USER) {
+                    if (adminBtn) adminBtn.style.display = "flex"; 
+                    loadAdminData();
+                    loadOrdersData();
+                }
+            } else {
+                if(userTag) userTag.innerText = "👤 زائر غير مسجل";
+                if(btnArea) btnArea.innerHTML = `<button class="auth-action-btn login-style" onclick="openAuthModal('login')">تسجيل دخول</button>`;
+            }
+        }
+
+        function openAuthModal(mode) {
+            const modal = document.getElementById("authModal");
+            if(modal) modal.style.display = "flex";
+            switchTab(mode);
+        }
+
+        function switchTab(mode) {
+            currentMode = mode;
+            const tabLogin = document.getElementById("tabLogin");
+            const tabRegister = document.getElementById("tabRegister");
+            const modalTitle = document.getElementById("modalTitle");
+
+            if(tabLogin && tabRegister && modalTitle) {
+                if (mode === 'login') {
+                    tabLogin.classList.add("active");
+                    tabRegister.classList.remove("active");
+                    modalTitle.innerText = "تسجيل الدخول";
+                } else {
+                    tabRegister.classList.add("active");
+                    tabLogin.classList.remove("active");
+                    modalTitle.innerText = "إنشاء حساب جديد بالديسكورد";
+                }
+            }
+        }
+
+        function handleAuthSubmit() {
+            const uEl = document.getElementById("authUsername");
+            const pEl = document.getElementById("authPassword");
+            if(!uEl || !pEl) return;
+
+            const username = uEl.value.trim().toLowerCase();
+            const password = pEl.value.trim();
+
+            if (!username || !password) {
+                alert("الرجاء تعبئة البيانات!");
+                return;
+            }
+
+            if (currentMode === 'login' && username === ADMIN_USER) {
+                if (password === ADMIN_PASS) {
+                    localStorage.setItem("currentLoggedInUser", ADMIN_USER);
+                    const modal = document.getElementById("authModal");
+                    if(modal) modal.style.display = "none";
+                    checkUserLogin();
+                    alert("👑 أهلاً بك يا الاونر، تم فتح لوحة الأدمن بنجاح.");
+                    return;
+                } else {
+                    alert("❌ باسورد الأدمن خطأ!");
+                    return;
+                }
+            }
+
+            let usersDb = JSON.parse(localStorage.getItem("registeredUsers")) || {};
+
+            if (currentMode === 'register') {
+                if (usersDb[username]) {
+                    alert("❌ هذا يوزر الديسكورد مسجل مسبقاً!");
+                    return;
+                }
+                usersDb[username] = password;
+                localStorage.setItem("registeredUsers", JSON.stringify(usersDb));
+                alert("✅ تم إنشاء حسابك بيوزر ديسكورد بنجاح! سجل دخولك الآن.");
+                switchTab('login');
+            } else {
+                if (!usersDb[username] || usersDb[username] !== password) {
+                    alert("❌ اليوزر أو الباسورد غير متطابق!");
+                    return;
+                }
+                localStorage.setItem("currentLoggedInUser", username);
+                const modal = document.getElementById("authModal");
+                if(modal) modal.style.display = "none";
+                checkUserLogin();
+                alert(`🎯 تم تسجيل الدخول بحسابك: ${username}`);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("currentLoggedInUser");
+            window.location.reload();
+        }
+
+        function sendOrder(productName, productPrice) {
+            const activeUser = localStorage.getItem("currentLoggedInUser");
+            if (!activeUser) {
+                alert("🔒 يجب تسجيل حسابك بيوزر الديسكورد قبل إرسال الطلبات!");
+                openAuthModal('login');
+                return;
+            }
+
+            const orderTime = new Date().toLocaleString('ar-EG');
+            let ordersList = JSON.parse(localStorage.getItem("shopOrdersList")) || [];
+            ordersList.push({ id: Date.now(), user: activeUser, item: productName, price: productPrice, time: orderTime });
+            localStorage.setItem("shopOrdersList", JSON.stringify(ordersList));
+
+            const packet = {
+                embeds: [{
+                    title: "🛒 طلب جديد من موقع ريسبكت تاون",
+                    color: 15281952,
+                    fields: [
+                        { name: "📦 المنتج/الخدمة:", value: productName, inline: true },
+                        { name: "💳 السعر/المقابل:", value: productPrice, inline: true },
+                        { name: "👤 العميل (ديسكورد):", value: `**${activeUser}**`, inline: false }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            fetch(webhookURL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(packet) })
+            .then(() => {
+                alert("✅ تم تسجيل طلبك بنجاح! سيتم توجيهك الآن إلى الديسكورد لفتح تكت وإتمام الاستلام.");
+                // فتح رابط سيرفر الديسكورد في صفحة جديدة بعد الطلب مباشرة لتوجيهه لفتح التكت
+                window.open(discordInvite, '_blank');
+            })
+            .catch(() => {
+                alert("✅ تم حفظ طلبك في لوحة التحكم بنجاح! توجه الآن إلى الديسكورد وافتح تكت.");
+                window.open(discordInvite, '_blank');
+            });
+        }
+
+        function loadOrdersData() {
+            const loggedInUser = localStorage.getItem("currentLoggedInUser");
+            if(loggedInUser !== ADMIN_USER) return; 
+
+            let ordersList = JSON.parse(localStorage.getItem("shopOrdersList")) || [];
+            const ordersTableBody = document.getElementById("adminOrdersTableBody");
+            
+            const totalOrdersElement = document.getElementById("totalOrdersStat");
+            if(totalOrdersElement) totalOrdersElement.innerText = ordersList.length;
+            
+            if (!ordersTableBody) return;
+            ordersTableBody.innerHTML = "";
+            
+            if (ordersList.length === 0) {
+                ordersTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#555;">لا توجد طلبات معلقة حالياً.</td></tr>`;
+                return;
+            }
+            ordersList.forEach(order => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td style="color:#e94560;"><b>${order.user}</b></td>
+                    <td>${order.item}</td>
+                    <td>${order.price}</td>
+                    <td style="font-size:12px; color:#555;">${order.time}</td>
+                    <td><button class="action-btn-done" onclick="completeOrder(${order.id})">إتمام</button></td>
+                `;
+                ordersTableBody.appendChild(row);
+            });
+        }
+
+        function completeOrder(orderId) {
+            let ordersList = JSON.parse(localStorage.getItem("shopOrdersList")) || [];
+            ordersList = ordersList.filter(order => order.id !== orderId);
+            localStorage.setItem("shopOrdersList", JSON.stringify(ordersList));
+            loadOrdersData();
+        }
+
+        function loadAdminData() {
+            const loggedInUser = localStorage.getItem("currentLoggedInUser");
+            if(loggedInUser !== ADMIN_USER) return; 
+
+            let usersDb = JSON.parse(localStorage.getItem("registeredUsers")) || {};
+            const tableBody = document.getElementById("adminUsersTableBody");
+            const userKeys = Object.keys(usersDb);
+            
+            const totalUsersElement = document.getElementById("totalUsersStat");
+            if(totalUsersElement) totalUsersElement.innerText = userKeys.length;
+            
+            if (!tableBody) return;
+            tableBody.innerHTML = "";
+            
+            if (userKeys.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#555;">لا توجد حسابات مسجلة بعد.</td></tr>`;
+                return;
+            }
+            userKeys.forEach(user => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td style="color:#e94560; font-weight:bold;">${user}</td>
+                    <td><code>${usersDb[user]}</code></td>
+                    <td><button class="action-btn-del" onclick="deleteUser('${user}')">حذف</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function deleteUser(username) {
+            if (confirm(`هل تريد بالتأكيد حذف حساب [ ${username} ]؟`)) {
+                let usersDb = JSON.parse(localStorage.getItem("registeredUsers")) || {};
+                delete usersDb[username];
+                localStorage.setItem("registeredUsers", JSON.stringify(usersDb));
+                loadAdminData();
+            }
+        }
+    </script>
+</body>
+</html>
